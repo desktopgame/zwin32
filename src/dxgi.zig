@@ -1126,13 +1126,18 @@ pub const IFactory2 = extern struct {
     pub fn Methods(comptime T: type) type {
         return extern struct {
             pub usingnamespace IFactory1.Methods(T);
+
+            pub inline fn CreateSwapChainForHwnd(self: *T, device: *IUnknown, hwnd: HWND, desc: *const SWAP_CHAIN_DESC1, fullScreenDesc: ?*const SWAP_CHAIN_FULLSCREEN_DESC, output: ?*IOutput, swapChain: *?*ISwapChain1) HRESULT {
+                return @as(*const IFactory2.VTable, @ptrCast(self.__v))
+                    .CreateSwapChainForHwnd(@as(*IFactory2, @ptrCast(self)), device, hwnd, desc, fullScreenDesc, output, swapChain);
+            }
         };
     }
 
     pub const VTable = extern struct {
         base: IFactory1.VTable,
         IsWindowedStereoEnabled: *anyopaque,
-        CreateSwapChainForHwnd: *anyopaque,
+        CreateSwapChainForHwnd: *const fn (*IFactory2, *IUnknown, HWND, *const SWAP_CHAIN_DESC1, ?*const SWAP_CHAIN_FULLSCREEN_DESC, ?*IOutput, *?*ISwapChain1) callconv(WINAPI) HRESULT,
         CreateSwapChainForCoreWindow: *anyopaque,
         GetSharedResourceAdapterLuid: *anyopaque,
         RegisterStereoStatusWindow: *anyopaque,
